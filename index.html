@@ -1127,13 +1127,25 @@
       </p>
       
       <!-- DOWNLOAD BUTTON -->
-      <a href="assets/CV.png" download="Om_Gandhi_Resume" class="btn-download">
-  ↓ Download Resume
-</a>
+      <a href="assets/cv.png" download="Om_Gandhi_Resume.png" class="btn-download" onclick="handleDownload(event)">
+        ↓ Download Resume
+      </a>
     </div>
   </div>
 </section>
 
+<script>
+  function handleDownload(event) {
+    event.preventDefault();
+
+    const link = document.createElement('a');
+    link.href = 'assets/cv.png';
+    link.download = 'Om_Gandhi_Resume.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+</script>
 <!-- CONTACT -->
 <section id="contact">
   <div class="contact-layout">
