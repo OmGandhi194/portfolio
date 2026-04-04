@@ -903,7 +903,7 @@
       <!-- Project 1: Car Rental -->
       <div class="project-card reveal">
                 <div class="project-visual">
-          <img src="assets/1.png" alt="Car Rental Screenshot" class="project-image"
+          <img src="assets/Home.png" alt="Car Rental Screenshot" class="project-image"
             style="position: relative;
             height: 480px;
             overflow: hidden;
@@ -1125,9 +1125,9 @@
       <p class="resume-desc">
         Get a comprehensive overview of my skills, education, projects, and career journey — all in one clean, well-designed document.
       </p>
-      
+
       <!-- DOWNLOAD BUTTON -->
-      <a href="assets/cv.pdf" download="cv.pdf" class="btn-download" onclick="handleDownload(event)">
+      <a href="assets/cv.pdf" download="assets/cv.pdf" class="btn-download" onclick="handleDownload(event)">
         ↓ Download Resume
       </a>
     </div>
@@ -1140,12 +1140,13 @@
 
     const link = document.createElement('a');
     link.href = 'assets/cv.pdf';
-    link.download = 'cv.pdf';
+    link.download = 'assets/cv.pdf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   }
 </script>
+
 <!-- CONTACT -->
 <section id="contact">
   <div class="contact-layout">
@@ -1171,25 +1172,26 @@
         </a>
       </div>
 
-      <div class="contact-form-area reveal" style="transition-delay:0.2s">
+      <form action="https://formspree.io/f/mgoppvyl" method="POST" class="contact-form-area reveal">
+        <!-- same inputs, but add name="" attributes -->
         <div class="form-group">
           <label class="form-label">Your Name</label>
-          <input class="form-input" type="text" placeholder="Jane Doe">
+          <input class="form-input" type="text" name="name" placeholder="Jane Doe" required>
         </div>
         <div class="form-group">
           <label class="form-label">Email Address</label>
-          <input class="form-input" type="email" placeholder="jane@company.com">
+          <input class="form-input" type="email" name="email" placeholder="jane@company.com" required>
         </div>
         <div class="form-group">
           <label class="form-label">Subject</label>
-          <input class="form-input" type="text" placeholder="Project collaboration, freelance work...">
+          <input class="form-input" type="text" name="subject" placeholder="Project collaboration...">
         </div>
         <div class="form-group">
           <label class="form-label">Message</label>
-          <textarea class="form-textarea" placeholder="Tell me about your project or opportunity..."></textarea>
+          <textarea class="form-textarea" name="message" placeholder="Tell me about your project..." required></textarea>
         </div>
-        <button class="form-submit">Send Message ✦</button>
-      </div>
+        <button class="form-submit" type="submit">Send Message ✦</button>
+      </form>
     </div>
   </div>
 </section>
