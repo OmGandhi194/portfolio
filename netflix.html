@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EliteDrive — Case Study</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+    --bg: #0a0a0f;
+    --bg2: #0f0f18;
+    --surface: #13131e;
+    --surface2: #1a1a2e;
+    --accent: #7c5cfc;
+    --accent2: #c084fc;
+    --gold: #f0c060;
+    --text: #f0eff8;
+    --text2: #9996b8;
+    --text3: #5f5d7a;
+    --border: rgba(124,92,252,0.15);
+    --glow: rgba(124,92,252,0.3);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      min-height: 100vh;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      position: fixed;
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease;
+      mix-blend-mode: difference;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 4rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,8,0.85);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      color: var(--accent2);
+      text-decoration: none;
+    }
+
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .nav-back:hover { color: var(--accent); }
+    .nav-back span { font-size: 1rem; }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 4rem 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(#7c5cfc 100%);
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.03) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+
+    .hero-noise {
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    }
+
+    .hero-content { position: relative; z-index: 2; }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--tag-bg);
+      border: 1px solid rgba(193, 76, 201, 0.2);
+      padding: 0.4rem 0.9rem;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.2s forwards;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.35s forwards;
+    }
+
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: 300;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.45s forwards;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--accent2);
+    }
+
+    .hero-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.55s forwards;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 4rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.65s forwards;
+    }
+
+    .meta-item { }
+    .meta-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .meta-val {
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      right: 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      animation: fadeUp 0.8s ease 1s forwards;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scrollPulse 2s ease infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(0.8); }
+    }
+
+    /* Overview */
+    .section { padding: 8rem 4rem; }
+    .section-inner { max-width: 1200px; margin: 0 auto; }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+
+    .label-line {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 2rem;
+    }
+    .label-line::before {
+      content: '';
+      display: block;
+      width: 30px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .overview-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem;
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+
+    .overview-desc {
+      font-size: 0.8rem;
+      line-height: 2;
+      color: var(--muted);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .stat-box {
+      background: var(--surface);
+      padding: 2rem;
+    }
+
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 300;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Gallery */
+    .gallery-section { padding: 4rem 4rem 8rem; }
+
+    .gallery-header {
+      max-width: 1200px;
+      margin: 0 auto 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .gallery-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      font-weight: 300;
+    }
+
+    .gallery-count {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Bento-style gallery */
+    .gallery-bento {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto;
+      gap: 12px;
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+      cursor: pointer;
+      group: true;
+    }
+
+    .gallery-item:nth-child(1) {
+      grid-column: 1 / 3;
+      grid-row: 1 / 2;
+      aspect-ratio: 16/8;
+    }
+    .gallery-item:nth-child(2) {
+      grid-column: 3 / 4;
+      grid-row: 1 / 2;
+      aspect-ratio: 4/5;
+    }
+    .gallery-item:nth-child(3) {
+      grid-column: 1 / 2;
+      grid-row: 2 / 3;
+      aspect-ratio: 4/5;
+    }
+    .gallery-item:nth-child(4) {
+      grid-column: 2 / 4;
+      grid-row: 2 / 3;
+      aspect-ratio: 16/8;
+    }
+    .gallery-item:nth-child(5) {
+      grid-column: 1 / 2;
+      aspect-ratio: 4/3;
+    }
+    .gallery-item:nth-child(6) {
+      grid-column: 2 / 3;
+      aspect-ratio: 4/3;
+    }
+    .gallery-item:nth-child(7) {
+      grid-column: 3 / 4;
+      aspect-ratio: 4/3;
+    }
+
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* Placeholder when no image */
+    .gallery-placeholder {
+      width: 100%;
+      height: 100%;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      background: var(--surface);
+      position: relative;
+    }
+
+    .placeholder-inner {
+      text-align: center;
+    }
+
+    .placeholder-screen {
+      width: 80px;
+      height: 52px;
+      border: 1.5px solid rgba(149, 76, 201, 0.3);
+      border-radius: 4px;
+      margin: 0 auto 0.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .placeholder-screen::after {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(145, 76, 201, 0.08) 0px,
+        rgba(201,168,76,0.08) 1px,
+        transparent 1px,
+        transparent 5px
+      );
+    }
+
+    .placeholder-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .placeholder-filename {
+      font-size: 0.55rem;
+      color: rgba(149, 76, 201, 0.4);
+      margin-top: 0.25rem;
+    }
+
+    .gallery-item:hover .gallery-img { transform: scale(1.04); }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(41, 0, 58, 0.8) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 1.5rem;
+    }
+
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+    .overlay-text {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent2);
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 4, 5, 0.97);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      transform: scale(0.95);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .lightbox.open .lightbox-img { transform: scale(1); }
+
+    .lightbox-close {
+      position: absolute;
+      top: 2rem; right: 2rem;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      padding: 0.5rem 1rem;
+      cursor: none;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .lightbox-close:hover { color: var(--accent); border-color: var(--accent); }
+
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 1.2rem;
+      width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: none;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .lightbox-nav:hover { color: var(--accent); border-color: var(--accent); }
+    .lightbox-prev { left: 2rem; }
+    .lightbox-next { right: 2rem; }
+
+    .lightbox-counter {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+    }
+
+    /* Process section */
+    .process-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .process-step {
+      background: var(--bg);
+      padding: 2.5rem 2rem;
+      position: relative;
+    }
+
+    .step-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem;
+      font-weight: 300;
+      color: rgba(168, 76, 201, 0.12);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .step-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 300;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    .step-desc {
+      font-size: 0.7rem;
+      line-height: 1.9;
+      color: var(--muted);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-text {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 0.7rem 1.5rem;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .back-btn:hover {
+      background: rgba(153, 76, 201, 0.11);
+      border-color: var(--accent);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 900px) {
+      nav { padding: 1.2rem 2rem; }
+      .hero { padding: 0 2rem 4rem; }
+      .section { padding: 5rem 2rem; }
+      .gallery-section { padding: 2rem 2rem 6rem; }
+      .gallery-bento { grid-template-columns: 1fr 1fr; }
+      .gallery-item:nth-child(1) { grid-column: 1 / 3; }
+      .gallery-item:nth-child(2) { grid-column: 1 / 2; }
+      .gallery-item:nth-child(3) { grid-column: 2 / 3; }
+      .gallery-item:nth-child(4) { grid-column: 1 / 3; }
+      .gallery-item:nth-child(5), .gallery-item:nth-child(6), .gallery-item:nth-child(7) { grid-column: span 1; }
+      .overview-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .process-grid { grid-template-columns: 1fr 1fr; }
+      .hero-meta { gap: 2rem; flex-wrap: wrap; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- Nav -->
+  <nav>
+    <a href="index.html" class="nav-logo">OM GANDHI</a>
+    <a href="index.html#projects" class="nav-back"><span>←</span> Back to Portfolio</a>
+  </nav>
+  
+  <!-- Gallery -->
+  <section class="gallery-section">
+    <div class="gallery-header reveal-on-scroll">
+      <div>
+        <h2 class="gallery-title">Visual Walkthrough</h2>
+      </div>
+      <div class="gallery-count">06 screens</div>
+    </div>
+
+    <div class="gallery-bento" id="galleryGrid">
+
+      <div class="gallery-item" data-index="0">
+        <img src="assets/net-user.png" alt="Homepage — Hero & Search"
+          class="gallery-img"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="gallery-placeholder" style="display:none">
+          <div class="placeholder-inner">
+            <div class="placeholder-screen"></div>
+            <div class="placeholder-label">Netflix User Profile</div>
+            <div class="placeholder-filename">assets/net-user.png</div>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="overlay-text">Netflix User Profile</span></div>
+      </div>
+
+      <div class="gallery-item" data-index="1">
+        <img src="assets/net-home.png" alt="Fleet Browse"
+          class="gallery-img"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="gallery-placeholder" style="display:none">
+          <div class="placeholder-inner">
+            <div class="placeholder-screen"></div>
+            <div class="placeholder-label">Netflix Homepage</div>
+            <div class="placeholder-filename">assets/net-home.png</div>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="overlay-text">Netflix Homepage</span></div>
+      </div>
+
+      <div class="gallery-item" data-index="2">
+        <img src="assets/net-video.png" alt="Car Detail Page"
+          class="gallery-img"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="gallery-placeholder" style="display:none">
+          <div class="placeholder-inner">
+            <div class="placeholder-screen"></div>
+            <div class="placeholder-label">Netflix Video Player</div>
+            <div class="placeholder-filename">assets/net-video.png</div>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="overlay-text">Netflix Video Player</span></div>
+      </div>
+
+      <div class="gallery-item" data-index="3">
+        <img src="assets/net-search.png" alt="Featurs"
+          class="gallery-img"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="gallery-placeholder" style="display:none">
+          <div class="placeholder-inner">
+            <div class="placeholder-screen"></div>
+            <div class="placeholder-label">Netflix Search</div>
+            <div class="placeholder-filename">assets/net-search.png</div>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="overlay-text">Netflix Search</span></div>
+      </div>
+
+      <div class="gallery-item" data-index="4">
+        <img src="assets/net-notification.png" alt="Services Page"
+          class="gallery-img"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="gallery-placeholder" style="display:none">
+          <div class="placeholder-inner">
+            <div class="placeholder-screen"></div>
+            <div class="placeholder-label">Netflix Notifications</div>
+            <div class="placeholder-filename">assets/net-notification.png</div>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="overlay-text">Netflix Notifications</span></div>
+      </div>
+
+      <div class="gallery-item" data-index="5">
+        <img src="assets/net-list.png" alt="User Dashboard"
+          class="gallery-img"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="gallery-placeholder" style="display:none">
+          <div class="placeholder-inner">
+            <div class="placeholder-screen"></div>
+            <div class="placeholder-label">Netflix Watchlist</div>
+            <div class="placeholder-filename">assets/net-list.png</div>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="overlay-text">Netflix Watchlist</span></div>
+      </div>
+
+      <div class="gallery-item" data-index="6">
+        <img src="assets/net-mylist.png" alt="Hero Mockup"
+          class="gallery-img"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="gallery-placeholder" style="display:none">
+          <div class="placeholder-inner">
+            <div class="placeholder-screen"></div>
+            <div class="placeholder-label">Netflix My List</div>
+            <div class="placeholder-filename">assets/net-mylist.png</div>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="overlay-text">Netflix My List </span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-text">© 2025 Om Gandhi · UX Designer</div>
+    <a href="index.html#projects" class="back-btn">← All Projects</a>
+  </footer>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lbClose">ESC / CLOSE</button>
+    <button class="lightbox-nav lightbox-prev" id="lbPrev">‹</button>
+    <img class="lightbox-img" id="lbImg" src="" alt="">
+    <button class="lightbox-nav lightbox-next" id="lbNext">›</button>
+    <div class="lightbox-counter" id="lbCounter">1 / 6</div>
+  </div>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    function animateCursor() {
+      cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+      rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // Lightbox
+    const items = document.querySelectorAll('.gallery-item');
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbCounter = document.getElementById('lbCounter');
+    let current = 0;
+    const images = [];
+
+    items.forEach((item, i) => {
+      const img = item.querySelector('.gallery-img');
+      images.push({ src: img ? img.src : '', alt: img ? img.alt : '' });
+      item.addEventListener('click', () => openLb(i));
+    });
+
+    function openLb(i) {
+      current = i;
+      lbImg.src = images[i].src;
+      lbImg.alt = images[i].alt;
+      lbCounter.textContent = (i + 1) + ' / ' + images.length;
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLb() {
+      lb.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('lbClose').addEventListener('click', closeLb);
+    document.getElementById('lbPrev').addEventListener('click', () => openLb((current - 1 + images.length) % images.length));
+    document.getElementById('lbNext').addEventListener('click', () => openLb((current + 1) % images.length));
+    lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
+    document.addEventListener('keydown', e => {
+      if (!lb.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLb();
+      if (e.key === 'ArrowLeft') openLb((current - 1 + images.length) % images.length);
+      if (e.key === 'ArrowRight') openLb((current + 1) % images.length);
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal-on-scroll');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: 0.15 });
+    reveals.forEach(el => obs.observe(el));
+  </script>
+</body>
+</html>
