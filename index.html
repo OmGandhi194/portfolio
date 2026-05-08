@@ -1295,6 +1295,46 @@
       }
     }
 
+    /* ── PARALLAX STARS ── */
+    @keyframes animStar {
+      from { transform: translateY(0px); }
+      to   { transform: translateY(-2000px); }
+    }
+
+    .star-layer {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: transparent;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .star-layer-1 {
+      width: 1px;
+      height: 1px;
+      animation: animStar 60s linear infinite;
+    }
+
+    .star-layer-2 {
+      width: 2px;
+      height: 2px;
+      animation: animStar 120s linear infinite;
+    }
+
+    .star-layer-3 {
+      width: 3px;
+      height: 3px;
+      animation: animStar 200s linear infinite;
+    }
+
+    .star-layer-after {
+      position: absolute;
+      left: 0;
+      background: transparent;
+      pointer-events: none;
+    }
+
     @keyframes pulse-ring {
       0% {
         transform: scale(0.8);
@@ -1698,6 +1738,16 @@
 
   <!-- HERO -->
   <section id="hero">
+    <!-- Parallax Star Layers -->
+    <div class="star-layer star-layer-1" id="stars1">
+      <div class="star-layer-after" id="stars1-after" style="top:2000px;width:1px;height:1px"></div>
+    </div>
+    <div class="star-layer star-layer-2" id="stars2">
+      <div class="star-layer-after" id="stars2-after" style="top:2000px;width:2px;height:2px"></div>
+    </div>
+    <div class="star-layer star-layer-3" id="stars3">
+      <div class="star-layer-after" id="stars3-after" style="top:2000px;width:3px;height:3px"></div>
+    </div>
     <canvas id="tubes-canvas"></canvas>
     <div class="hero-tubes-overlay"></div>
     <div class="hero-bg"></div>
@@ -2229,40 +2279,51 @@
       }
     });
 
-    // ── STAR CANVAS BACKGROUND ──
-    const canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.5';
-    document.body.insertBefore(canvas, document.body.firstChild);
-    const ctx = canvas.getContext('2d');
+    // ── PARALLAX STAR BACKGROUND ──
+    (function initParallaxStars() {
+      // Palette-matched star colors: white core + purple/lavender tints
+      const starColors = [
+        '#ffffff',
+        '#f0eff8',
+        '#c084fc',
+        '#d4bbfe',
+        '#a78bfa',
+        '#e8e0ff'
+      ];
 
-    let W, H, stars = [];
-    function initCanvas() {
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-      stars = Array.from({ length: 80 }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: Math.random() * 1.2 + 0.3,
-        o: Math.random() * 0.5 + 0.1,
-        speed: Math.random() * 0.3 + 0.1
-      }));
-    }
-    initCanvas();
-    window.addEventListener('resize', initCanvas);
+      function randomColor() {
+        return starColors[Math.floor(Math.random() * starColors.length)];
+      }
 
-    function drawStars() {
-      ctx.clearRect(0, 0, W, H);
-      stars.forEach(s => {
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(124,92,252,${s.o})`;
-        ctx.fill();
-        s.y -= s.speed;
-        if (s.y < 0) { s.y = H; s.x = Math.random() * W; }
-      });
-      requestAnimationFrame(drawStars);
-    }
-    drawStars();
+      function generateBoxShadows(n, areaW, areaH) {
+        let parts = [];
+        for (let i = 0; i < n; i++) {
+          const x = Math.floor(Math.random() * areaW);
+          const y = Math.floor(Math.random() * areaH);
+          const color = randomColor();
+          parts.push(`${x}px ${y}px ${color}`);
+        }
+        return parts.join(', ');
+      }
+
+      const W = window.innerWidth || 1440;
+      const H = 2000;
+
+      const shadows1 = generateBoxShadows(700, W, H);
+      const shadows2 = generateBoxShadows(200, W, H);
+      const shadows3 = generateBoxShadows(100, W, H);
+
+      const s1 = document.getElementById('stars1');
+      const s1a = document.getElementById('stars1-after');
+      const s2 = document.getElementById('stars2');
+      const s2a = document.getElementById('stars2-after');
+      const s3 = document.getElementById('stars3');
+      const s3a = document.getElementById('stars3-after');
+
+      if (s1) { s1.style.boxShadow = shadows1; s1a.style.boxShadow = shadows1; }
+      if (s2) { s2.style.boxShadow = shadows2; s2a.style.boxShadow = shadows2; }
+      if (s3) { s3.style.boxShadow = shadows3; s3a.style.boxShadow = shadows3; }
+    })();
 
     // ── 3D TUBES INTERACTIVE BACKGROUND ──
     (async function initTubes() {
