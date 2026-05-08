@@ -400,6 +400,59 @@
       background: rgba(124, 92, 252, 0.06);
     }
 
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.9rem 2rem;
+      border-radius: 100px;
+      border: 1px solid rgba(240, 192, 96, 0.35);
+      color: var(--gold);
+      background: rgba(240, 192, 96, 0.06);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-download::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(240, 192, 96, 0.18), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.5s;
+    }
+
+    .btn-download:hover {
+      border-color: var(--gold);
+      color: #fff;
+      background: rgba(240, 192, 96, 0.14);
+      box-shadow: 0 0 24px rgba(240, 192, 96, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .btn-download:hover::before {
+      left: 125%;
+    }
+
+    .btn-download svg {
+      flex-shrink: 0;
+      transition: transform 0.3s;
+    }
+
+    .btn-download:hover svg {
+      transform: translateY(2px);
+    }
+
     .hero-scroll {
       position: absolute;
       bottom: 2.5rem;
@@ -1297,8 +1350,13 @@
 
     /* ── PARALLAX STARS ── */
     @keyframes animStar {
-      from { transform: translateY(0px); }
-      to   { transform: translateY(-2000px); }
+      from {
+        transform: translateY(0px);
+      }
+
+      to {
+        transform: translateY(-2000px);
+      }
     }
 
     .star-layer {
@@ -1771,6 +1829,15 @@
       <button class="btn-secondary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
         Contact Me
       </button>
+      <a class="btn-download" href="assets/resume.pdf" download="Om_Gandhi_Resume.pdf" id="download-resume-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Download Resume
+      </a>
     </div>
 
     <div class="hero-badges">
